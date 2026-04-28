@@ -7,6 +7,7 @@
 #include "GameStatePauseMenu.h"
 #include "GameStateMainMenu.h"
 #include "GameStateRecords.h"
+#include "GameStateData.h"
 
 namespace SnakeGame
 {
@@ -34,189 +35,63 @@ namespace SnakeGame
 		Shutdown();
 	}
 
-	void Game::InitGameState(GameState& state)
+	std::unique_ptr<GameStateData> Game::CreateGameState(GameStateType type)
 	{
-		switch (state.type)
+		switch (type)
 		{
 		case GameStateType::MainMenu:
-		{
-			new (&state.data.mainMenu) GameStateMainMenu();
-			state.data.mainMenu.Init(this);
-			break;
-		}
+			return std::make_unique<GameStateMainMenu>();
 		case GameStateType::Playing:
-		{
-			new (&state.data.playing) GameStatePlaying();
-			state.data.playing.Init(this);
-			break;
-		}
+			return std::make_unique<GameStatePlaying>();
 		case GameStateType::GameOver:
-		{
-			new (&state.data.gameOver) GameStateGameOver();
-			state.data.gameOver.Init(this);
-			break;
-		}
+			return std::make_unique<GameStateGameOver>();
 		case GameStateType::ExitDialog:
-		{
-			new (&state.data.pauseMenu) GameStatePauseMenu();
-			state.data.pauseMenu.Init(this);
-			break;
-		}
+			return std::make_unique<GameStatePauseMenu>();
 		case GameStateType::Records:
-		{
-			new (&state.data.records) GameStateRecords();
-			state.data.records.Init(this);
-			break;
-		}
+			return std::make_unique<GameStateRecords>();
 		default:
-			assert(false);
-			break;
+			return nullptr;
+		}
+	}
+
+	void Game::InitGameState(GameState& state)
+	{
+		state.data = CreateGameState(state.type);
+		if (state.data)
+		{
+			state.data->Init(this);
 		}
 	}
 
 	void Game::ShutdownGameState(GameState& state)
 	{
-		switch (state.type)
+		if (state.data)
 		{
-		case GameStateType::MainMenu:
-		{
-			state.data.mainMenu.Shutdown();
-			state.data.mainMenu.~GameStateMainMenu();
-			break;
-		}
-		case GameStateType::Playing:
-		{
-			state.data.playing.Shutdown();
-			state.data.playing.~GameStatePlaying();
-			break;
-		}
-		case GameStateType::GameOver:
-		{
-			state.data.gameOver.Shutdown();
-			state.data.gameOver.~GameStateGameOver();
-			break;
-		}
-		case GameStateType::ExitDialog:
-		{
-			state.data.pauseMenu.Shutdown();
-			state.data.pauseMenu.~GameStatePauseMenu();
-			break;
-		}
-		case GameStateType::Records:
-		{
-			state.data.records.Shutdown();
-			state.data.records.~GameStateRecords();
-			break;
-		}
-		default:
-			assert(false);
-			break;
+			state.data.reset();
 		}
 		state.type = GameStateType::None;
 	}
 
-	void Game::HandleWindowEventGameState(GameState& state, sf::Event& event)
-	{
-		switch (state.type)
-		{
-		case GameStateType::MainMenu:
-		{
-			state.data.mainMenu.HandleWindowEvent(event);
-			break;
-		}
-		case GameStateType::Playing:
-		{
-			state.data.playing.HandleWindowEvent(event);
-			break;
-		}
-		case GameStateType::GameOver:
-		{
-			state.data.gameOver.HandleWindowEvent(event);
-			break;
-		}
-		case GameStateType::ExitDialog:
-		{
-			state.data.pauseMenu.HandleWindowEvent(event);
-			break;
-		}
-		case GameStateType::Records:
-		{
-			state.data.records.HandleWindowEvent(event);
-			break;
-		}
-		default:
-			assert(false);
-			break;
-		}
-	}
-
 	void Game::UpdateGameState(GameState& state, float timeDelta, sf::RenderWindow& window)
 	{
-		switch (state.type)
+		if (state.data)
 		{
-		case GameStateType::MainMenu:
-		{
-			state.data.mainMenu.Update(timeDelta);
-			break;
-		}
-		case GameStateType::Playing:
-		{
-			state.data.playing.Update(timeDelta, window);
-			break;
-		}
-		case GameStateType::GameOver:
-		{
-			state.data.gameOver.Update(timeDelta);
-			break;
-		}
-		case GameStateType::ExitDialog:
-		{
-			state.data.pauseMenu.Update(timeDelta);
-			break;
-		}
-		case GameStateType::Records:
-		{
-			state.data.records.Update(timeDelta);
-			break;
-		}
-		default:
-			assert(false);
-			break;
+			if (state.type == GameStateType::Playing)
+			{
+				static_cast<GameStatePlaying*>(state.data.get())->Update(timeDelta, window);
+			}
+			else
+			{
+				state.data->Update(timeDelta);
+			}
 		}
 	}
 
 	void Game::DrawGameState(GameState& state, sf::RenderWindow& window)
 	{
-		switch (state.type)
+		if (state.data)
 		{
-		case GameStateType::MainMenu:
-		{
-			state.data.mainMenu.Draw(window);
-			break;
-		}
-		case GameStateType::Playing:
-		{
-			state.data.playing.Draw(window);
-			break;
-		}
-		case GameStateType::GameOver:
-		{
-			state.data.gameOver.Draw(window);
-			break;
-		}
-		case GameStateType::ExitDialog:
-		{
-			state.data.pauseMenu.Draw(window);
-			break;
-		}
-		case GameStateType::Records:
-		{
-			state.data.records.Draw(window);
-			break;
-		}
-		default:
-			assert(false);
-			break;
+			state.data->Draw(window);
 		}
 	}
 
@@ -229,10 +104,9 @@ namespace SnakeGame
 			{
 				window.close();
 			}
-
-			if (stateStack.size() > 0)
+			if (stateStack.size() > 0 && stateStack.back().data)
 			{
-				HandleWindowEventGameState(stateStack.back(), event);
+				stateStack.back().data->HandleWindowEvent(event);
 			}
 		}
 	}
@@ -256,7 +130,7 @@ namespace SnakeGame
 				stateStack.pop_back();
 				if (stateStack.size() > 0 && stateStack.back().type == GameStateType::Playing)
 				{
-					stateStack.back().data.playing.Resume();
+					stateStack.back().data->Resume();
 				}
 
 			}

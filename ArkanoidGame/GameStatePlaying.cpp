@@ -15,6 +15,8 @@ namespace SnakeGame
 		hitSound.setBuffer(hitSoundBuffer);
 		assert(gameOverSoundBuffer.loadFromFile(SOUNDS_PATH + "Death.wav"));
 		gameOverSound.setBuffer(gameOverSoundBuffer);
+		assert(victorySoundBuffer.loadFromFile(SOUNDS_PATH + "Victory.wav"));
+		victorySound.setBuffer(victorySoundBuffer);
 
 		background.setSize(sf::Vector2f(SCREEN_WIDTH, SCREEN_HEGHT));
 		background.setPosition(0.f, 0.f);
@@ -42,7 +44,10 @@ namespace SnakeGame
 
 		score = 0;
 		isGameOver = false;
+		isVictory = false;
 		isBallLaunched = false;
+		isPaused = false;
+		SpawnBlocks();
 		ResetBall();
 		UpdateUI();
 
@@ -56,6 +61,22 @@ namespace SnakeGame
 	void GameStatePlaying::HandleWindowEvent(const sf::Event& event)
 	{
 		if (isGameOver) return;
+
+		if (isVictory)
+		{
+			if (event.type == sf::Event::KeyPressed)
+			{
+				if (event.key.code == sf::Keyboard::Y)
+				{
+					Init(m_game);
+				}
+				else if (event.key.code == sf::Keyboard::N)
+				{
+					m_game->SwitchStateTo(GameStateType::MainMenu);
+				}
+			}
+			return;
+		}
 
 		if (event.type == sf::Event::KeyPressed)
 		{
@@ -71,9 +92,14 @@ namespace SnakeGame
 		}
 	}
 
+	void GameStatePlaying::Update(float timeDelta)
+	{
+
+	}
+
 	void GameStatePlaying::Update(float timeDelta, sf::RenderWindow& window)
 	{
-		if (isGameOver || isPaused) return;
+		if (isGameOver || isVictory || isPaused) return;
 
 		UpdatePlatformMovement(window);
 		
@@ -81,6 +107,7 @@ namespace SnakeGame
 		{
 			UpdateBallMovement(timeDelta);
 			CheckCollisions();
+			CheckBlockCollisions();
 		}
 	}
 
@@ -92,6 +119,12 @@ namespace SnakeGame
 	void GameStatePlaying::Draw(sf::RenderWindow& window)
 	{
 		window.draw(background);
+
+		for (auto& block : blocks)
+		{
+			block.Draw(window);
+		}
+
 		window.draw(platform);
 		window.draw(ball);
 		window.draw(scoreText);
@@ -99,6 +132,18 @@ namespace SnakeGame
 		sf::Vector2f viewSize = window.getView().getSize();
 		inputHintText.setPosition(viewSize.x - 10.f, 10.f);
 		window.draw(inputHintText);
+
+		if (isVictory)
+		{
+			sf::Text gameOverText;
+			gameOverText.setFont(font);
+			gameOverText.setCharacterSize(48);
+			gameOverText.setFillColor(sf::Color::Yellow);
+			gameOverText.setString("VICTORY");
+			gameOverText.setOrigin(GetTextOrigin(gameOverText, { 0.5f, 0.5f }));
+			gameOverText.setPosition(SCREEN_WIDTH / 2.f, SCREEN_HEGHT / 2.f - 50.f);
+			window.draw(gameOverText);
+		}
 		
 		if (isGameOver)
 		{
@@ -108,7 +153,7 @@ namespace SnakeGame
 			gameOverText.setFillColor(sf::Color::Green);
 			gameOverText.setString("GAME OVER");
 			gameOverText.setOrigin(GetTextOrigin(gameOverText, { 0.5f, 0.5f }));
-			gameOverText.setPosition(SCREEN_WIDTH / 2.f, SCREEN_HEGHT / 2.f);
+			gameOverText.setPosition(SCREEN_WIDTH / 2.f, SCREEN_HEGHT / 2.f + 20.f);
 			window.draw(gameOverText);
 		}
 	}
@@ -201,7 +246,7 @@ namespace SnakeGame
 
 	void GameStatePlaying::UpdateUI()
 	{
-		scoreText.setString("Score: " + std::to_string(score));
+		scoreText.setString("Score: " + std::to_string(score) + "Blocks: " + std::to_string(blocksRemaining));
 	}
 
 	void GameStatePlaying::GameOver()
@@ -214,5 +259,84 @@ namespace SnakeGame
 
 		m_game->UpdateRecord(PLAYER_NAME, score);
 		m_game->SwitchStateTo(GameStateType::GameOver);
+	}
+
+	void GameStatePlaying::SpawnBlocks()
+	{
+		blocks.clear();
+		blocksRemaining = 0;
+		
+		float blockWidth = 70.f;
+		float blockHeight = 25.f;
+		float startX = 50.f;
+		float startY = 50.f;
+		float spacingX = 10.f;
+		float spacingY = 10.f;
+
+		std::vector<sf::Color> colors =
+		{
+			sf::Color::Red, sf::Color::Yellow, sf::Color::Green,
+			sf::Color::Cyan, sf::Color::Blue, sf::Color::Magenta, sf::Color::White
+		};
+		
+		for (int row = 0; row < 5; ++row)
+		{
+			sf::Color color = colors[row % colors.size()];
+			for (int col = 0; col < 8; ++col)
+			{
+				Block block;
+				float x = startX + col * (blockWidth + spacingX);
+				float y = startY + col * (blockHeight + spacingY);
+				block.Init(blockWidth, blockHeight, color);
+				block.SetPosition(sf::Vector2f(x, y));
+				blocks.push_back(block);
+				blocksRemaining++;
+			}
+		}
+	}
+
+	void GameStatePlaying::CheckBlockCollisions()
+	{
+		sf::FloatRect ballBounds = ball.getGlobalBounds();
+		for (auto& block : blocks)
+		{
+			if (block.IsAlive() && ballBounds.intersects(block.GetGlobalBounds()))
+			{
+				sf::FloatRect blockBounds = block.GetGlobalBounds();
+				float overlapLeft = ballBounds.left + ballBounds.width - blockBounds.left;
+				float overlapRight = blockBounds.left + blockBounds.width - ballBounds.left;
+				float overlapTop = ballBounds.top + ballBounds.height - blockBounds.top;
+				float overlapBottom = blockBounds.top + blockBounds.height - ballBounds.top;
+
+				if (std::min(overlapLeft, overlapRight) < std::min(overlapTop, overlapBottom))
+				{
+					ballVelocity.x = -ballVelocity.x;
+				}
+				else
+				{
+					ballVelocity.y = -ballVelocity.y;
+				}
+				block.Destroy();
+				blocksRemaining--;
+				hitSound.play();
+				score += 10;
+				UpdateUI();
+
+				if (blocksRemaining == 0)
+				{
+					Victory();
+				}
+				break;
+			}
+		}
+	}
+
+	void GameStatePlaying::Victory()
+	{
+		if (isVictory) return;
+
+		isVictory = true;
+		isBallLaunched = false;
+		victorySound.play();
 	}
 }

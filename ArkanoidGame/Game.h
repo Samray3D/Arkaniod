@@ -32,42 +32,6 @@ namespace SnakeGame
 		Records,
 	};
 
-	struct GameState
-	{
-		GameStateType type = GameStateType::None;
-		union StateData
-		{
-			GameStatePlaying playing;
-			GameStateGameOver gameOver;
-			GameStateMainMenu mainMenu;
-			GameStatePauseMenu pauseMenu;
-			GameStateRecords records;
-
-			StateData() 
-			{
-				new (&playing) GameStatePlaying();
-			}
-			~StateData() {}
-		} data;
-		bool isExclusivelyVisible = false;
-		GameState() : type(GameStateType::None), isExclusivelyVisible(false)
-		{
-
-		}
-
-		GameState(GameStateType t, bool exclusive ) : type(t), isExclusivelyVisible(exclusive)
-		{
-
-		}
-		GameState(const GameState&) = delete;
-		GameState& operator= (const GameState&) = delete;
-
-		GameState(GameState&& other) noexcept : type(other.type), isExclusivelyVisible(other.isExclusivelyVisible)
-		{
-
-		}
-	};
-
 	enum class GameStateChangeType
 	{
 		None,
@@ -75,6 +39,20 @@ namespace SnakeGame
 		Pop,
 		Switch
 	};
+
+	struct GameState
+	{
+		GameStateType type = GameStateType::None;
+		std::unique_ptr<GameStateData> data;
+		bool isExclusivelyVisible = false;
+
+		GameState() = default;
+		GameState(GameStateType t, bool exclusive ) : type(t), isExclusivelyVisible(exclusive)
+		{
+
+		}
+	};
+
 
 	class Game
 	{
@@ -120,8 +98,10 @@ namespace SnakeGame
 
 		void InitGameState(GameState& state);
 		void ShutdownGameState(GameState& state);
-		void HandleWindowEventGameState(GameState& state, sf::Event& event);
+
 		void UpdateGameState(GameState& state, float timeDelta, sf::RenderWindow& window);
 		void DrawGameState(GameState& state, sf::RenderWindow& window);
+
+		std::unique_ptr<GameStateData> CreateGameState(GameStateType type);
 	};
 }

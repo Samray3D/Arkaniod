@@ -1,22 +1,23 @@
 #pragma once
 #include "SFML/Graphics.hpp"
 #include "Menu.h"
+#include "GameStateData.h"
 
 namespace SnakeGame
 {
 	class Game;
 
-	class GameStateMainMenu
+	class GameStateMainMenu : public GameStateData
 	{
 	public:
 		GameStateMainMenu() = default;
 		~GameStateMainMenu() = default;
 
-		void Init(Game* game);
-		void Shutdown();
-		void HandleWindowEvent(const sf::Event& event);
-		void Update(float timeDelta);
-		void Draw(sf::RenderWindow& window);
+		void Init(Game* game) override;
+		void Shutdown() override;
+		void HandleWindowEvent(const sf::Event& event) override;
+		void Update(float timeDelta) override;
+		void Draw(sf::RenderWindow& window) override;
 
 	private:
 		Game* m_game = nullptr;
