@@ -286,7 +286,7 @@ namespace SnakeGame
 			{
 				Block block;
 				float x = startX + col * (blockWidth + spacingX);
-				float y = startY + col * (blockHeight + spacingY);
+				float y = startY + row * (blockHeight + spacingY);
 				block.Init(blockWidth, blockHeight, color);
 				block.SetPosition(sf::Vector2f(x, y));
 				blocks.push_back(block);
