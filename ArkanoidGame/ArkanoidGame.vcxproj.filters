@@ -79,5 +79,8 @@
     <ClInclude Include="Block.h">
       <Filter>Sources</Filter>
     </ClInclude>
+    <ClInclude Include="GameObject.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

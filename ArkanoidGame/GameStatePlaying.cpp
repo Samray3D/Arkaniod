@@ -143,6 +143,15 @@ namespace SnakeGame
 			gameOverText.setOrigin(GetTextOrigin(gameOverText, { 0.5f, 0.5f }));
 			gameOverText.setPosition(SCREEN_WIDTH / 2.f, SCREEN_HEGHT / 2.f - 50.f);
 			window.draw(gameOverText);
+
+			sf::Text restartText;
+			gameOverText.setFont(font);
+			gameOverText.setCharacterSize(24);
+			gameOverText.setFillColor(sf::Color::White);
+			gameOverText.setString("Play again? (Y/N)");
+			gameOverText.setOrigin(GetTextOrigin(restartText, { 0.5f, 0.5f }));
+			gameOverText.setPosition(SCREEN_WIDTH / 2.f, SCREEN_HEGHT / 2.f + 20.f);
+			window.draw(restartText);
 		}
 		
 		if (isGameOver)
@@ -268,8 +277,8 @@ namespace SnakeGame
 		
 		float blockWidth = 70.f;
 		float blockHeight = 25.f;
-		float startX = 50.f;
-		float startY = 50.f;
+		float startX = 100.f;
+		float startY = 100.f;
 		float spacingX = 10.f;
 		float spacingY = 10.f;
 

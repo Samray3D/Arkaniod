@@ -1,25 +1,23 @@
 #pragma once
 #include <SFML/Graphics.hpp>
+#include "GameObject.h"
 
 namespace SnakeGame
 {
-	class Block
+	class Block : public GameObject
 	{
 	public:
 		Block();
 		explicit Block(const sf::Color& color);
 
 		void Init(float width, float height, const sf::Color& color);
-		void Draw(sf::RenderWindow& window);
-		void Update(float timeDelta);
-		sf::FloatRect GetGlobalBounds() const;
-		sf::Vector2f GetPosition() const;
-		void SetPosition(const sf::Vector2f& position);
+		void Draw(sf::RenderWindow& window) override;
+		void Update(float timeDelta) override;
+		sf::FloatRect GetGlobalBounds() const override;
+		sf::Vector2f GetPosition() const override;
+		void SetPosition(const sf::Vector2f& position) override;
 
-		bool IsAlive() const { return isAlive; }
-		void Destroy() { isAlive = false; }
 	private:
 		sf::RectangleShape shape;
-		bool isAlive = true;
 	};
 }
