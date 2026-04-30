@@ -145,12 +145,12 @@ namespace SnakeGame
 			window.draw(gameOverText);
 
 			sf::Text restartText;
-			gameOverText.setFont(font);
-			gameOverText.setCharacterSize(24);
-			gameOverText.setFillColor(sf::Color::White);
-			gameOverText.setString("Play again? (Y/N)");
-			gameOverText.setOrigin(GetTextOrigin(restartText, { 0.5f, 0.5f }));
-			gameOverText.setPosition(SCREEN_WIDTH / 2.f, SCREEN_HEGHT / 2.f + 20.f);
+			restartText.setFont(font);
+			restartText.setCharacterSize(24);
+			restartText.setFillColor(sf::Color::White);
+			restartText.setString("Play again? (Y/N) ?");
+			restartText.setOrigin(GetTextOrigin(restartText, { 0.5f, 0.5f }));
+			restartText.setPosition(SCREEN_WIDTH / 2.f, SCREEN_HEGHT / 2.f + 20.f);
 			window.draw(restartText);
 		}
 		
