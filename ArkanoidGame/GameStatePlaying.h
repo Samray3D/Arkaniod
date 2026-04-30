@@ -4,6 +4,7 @@
 #include "GameStateData.h"
 #include <vector>
 #include "Block.h"
+#include "DurableBlock.h"
 
 
 
@@ -47,7 +48,7 @@ namespace SnakeGame
 		float ballSpeed = 300.f;
 
 		int score = 0;
-		int blocksRemaining = 0;
+		
 
 		bool isBallLaunched = false;
 		bool isGameOver = false;
@@ -59,6 +60,8 @@ namespace SnakeGame
 		sf::RectangleShape background;
 
 		std::vector<Block> blocks;
+		std::vector<DurableBlock> durableBlocks;
+		int blocksRemaining = 0;
 
 		sf::Sound hitSound;
 		sf::Sound gameOverSound;

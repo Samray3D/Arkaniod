@@ -125,6 +125,11 @@ namespace SnakeGame
 			block.Draw(window);
 		}
 
+		for (auto& durableBlock : durableBlocks)
+		{
+			durableBlock.Draw(window);
+		}
+
 		window.draw(platform);
 		window.draw(ball);
 		window.draw(scoreText);
@@ -273,6 +278,7 @@ namespace SnakeGame
 	void GameStatePlaying::SpawnBlocks()
 	{
 		blocks.clear();
+		durableBlocks.clear();
 		blocksRemaining = 0;
 		
 		float blockWidth = 70.f;
@@ -284,22 +290,37 @@ namespace SnakeGame
 
 		std::vector<sf::Color> colors =
 		{
-			sf::Color::Red, sf::Color::Yellow, sf::Color::Green,
-			sf::Color::Cyan, sf::Color::Blue, sf::Color::Magenta, sf::Color::White
+			sf::Color::Green, sf::Color::Yellow, sf::Color::Yellow,
+			sf::Color::Yellow, sf::Color::Yellow, sf::Color::Yellow, sf::Color::Yellow
+		};
+
+		std::vector<sf::Color> durableColors =
+		{
+			sf::Color::Green, sf::Color::Magenta, sf::Color::Red, sf::Color::Yellow
 		};
 		
 		for (int row = 0; row < 5; ++row)
 		{
-			sf::Color color = colors[row % colors.size()];
 			for (int col = 0; col < 8; ++col)
 			{
-				Block block;
 				float x = startX + col * (blockWidth + spacingX);
 				float y = startY + row * (blockHeight + spacingY);
-				block.Init(blockWidth, blockHeight, color);
-				block.SetPosition(sf::Vector2f(x, y));
-				blocks.push_back(block);
-				blocksRemaining++;
+				if (row == 4)
+				{
+					DurableBlock durableBlock;
+					durableBlock.Init(blockWidth, blockHeight, durableColors);
+					durableBlock.SetPosition(sf::Vector2f(x, y));
+					durableBlocks.push_back(durableBlock);
+					blocksRemaining++;
+				}
+				else
+				{
+					Block block;
+					block.Init(blockWidth, blockHeight, sf::Color::Yellow);
+					block.SetPosition(sf::Vector2f(x, y));
+					blocks.push_back(block);
+					blocksRemaining++;
+				}
 			}
 		}
 	}
@@ -335,8 +356,41 @@ namespace SnakeGame
 				{
 					Victory();
 				}
-				break;
+				return;
 			}
+		}
+		for (auto& durableBlock : durableBlocks)
+		{
+			if (durableBlock.IsAlive() && ballBounds.intersects(durableBlock.GetGlobalBounds()))
+			{
+				sf::FloatRect blockBounds = durableBlock.GetGlobalBounds();
+				float overlapLeft = ballBounds.left + ballBounds.width - blockBounds.left;
+				float overlapRight = blockBounds.left + blockBounds.width - ballBounds.left;
+				float overlapTop = ballBounds.top + ballBounds.height - blockBounds.top;
+				float overlapBottom = blockBounds.top + blockBounds.height - ballBounds.top;
+
+				if (std::min(overlapLeft, overlapRight) < std::min(overlapTop, overlapBottom))
+				{
+					ballVelocity.x = -ballVelocity.x;
+				}
+				else
+				{
+					ballVelocity.y = -ballVelocity.y;
+				}
+				if (durableBlock.OnHit())
+				{
+					blocksRemaining--;
+					score += 30;
+				}
+				hitSound.play();
+				UpdateUI();
+				if (blocksRemaining == 0)
+				{
+					Victory();
+				}
+				return;
+			}
+
 		}
 	}
 

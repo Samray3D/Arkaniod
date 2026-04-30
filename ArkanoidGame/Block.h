@@ -17,7 +17,7 @@ namespace SnakeGame
 		sf::Vector2f GetPosition() const override;
 		void SetPosition(const sf::Vector2f& position) override;
 
-	private:
+	protected:
 		sf::RectangleShape shape;
 	};
 }

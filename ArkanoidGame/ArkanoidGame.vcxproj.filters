@@ -43,6 +43,9 @@
     <ClCompile Include="Block.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="DurableBlock.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -80,6 +83,9 @@
       <Filter>Sources</Filter>
     </ClInclude>
     <ClInclude Include="GameObject.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="DurableBlock.h">
       <Filter>Sources</Filter>
     </ClInclude>
   </ItemGroup>

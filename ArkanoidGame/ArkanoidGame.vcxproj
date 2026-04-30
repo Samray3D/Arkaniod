@@ -160,6 +160,7 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Block.cpp" />
+    <ClCompile Include="DurableBlock.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="GameMain.cpp" />
@@ -174,6 +175,7 @@
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="Block.h" />
+    <ClInclude Include="DurableBlock.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GameStateData.h" />
     <ClInclude Include="Sprite.h" />
