@@ -42,6 +42,13 @@ namespace SnakeGame
 		inputHintText.setString("Press SPACE to launch ball, press ESC to pause");
 		inputHintText.setOrigin(GetTextOrigin(inputHintText, { 1.f, 0.f }));
 
+
+		scoreSubject.AddObserver(&scoreDisplay);
+		ballContext.SetBehavior(std::make_unique<NormalBallBehavior>());
+		auto basePlatform = std::make_unique<Platform>();
+		basePlatform->Init(platformWidth, platformHeight, sf::Color::Red);
+		currentPlatform = std::move(basePlatform);
+
 		score = 0;
 		isGameOver = false;
 		isVictory = false;
@@ -50,6 +57,7 @@ namespace SnakeGame
 		SpawnBlocks();
 		ResetBall();
 		UpdateUI();
+
 
 	}
 
@@ -101,7 +109,13 @@ namespace SnakeGame
 	{
 		if (isGameOver || isVictory || isPaused) return;
 
+		for (auto& bonus : bonuses)
+		{
+			bonus.Update(timeDelta);
+		}
+
 		UpdatePlatformMovement(window);
+		CheckBlockCollisions();
 		
 		if (isBallLaunched)
 		{
@@ -130,9 +144,14 @@ namespace SnakeGame
 			durableBlock.Draw(window);
 		}
 
+		for (auto& bonus : bonuses)
+		{
+			bonus.Draw(window);
+		}
+
 		window.draw(platform);
 		window.draw(ball);
-		window.draw(scoreText);
+		scoreDisplay.Draw(window);
 
 		sf::Vector2f viewSize = window.getView().getSize();
 		inputHintText.setPosition(viewSize.x - 10.f, 10.f);
@@ -328,31 +347,46 @@ namespace SnakeGame
 	void GameStatePlaying::CheckBlockCollisions()
 	{
 		sf::FloatRect ballBounds = ball.getGlobalBounds();
+		bool ballCanPasThrough = ballContext.CanDestroyBlockDirectly();
+		float speedMultiplier = ballContext.GetSpeedMultiplier();
+		ballSpeed = 300.f * speedMultiplier;
+
 		for (auto& block : blocks)
 		{
 			if (block.IsAlive() && ballBounds.intersects(block.GetGlobalBounds()))
 			{
-				sf::FloatRect blockBounds = block.GetGlobalBounds();
-				float overlapLeft = ballBounds.left + ballBounds.width - blockBounds.left;
-				float overlapRight = blockBounds.left + blockBounds.width - ballBounds.left;
-				float overlapTop = ballBounds.top + ballBounds.height - blockBounds.top;
-				float overlapBottom = blockBounds.top + blockBounds.height - ballBounds.top;
+				if (!ballCanPasThrough)
+				{
+					sf::FloatRect blockBounds = block.GetGlobalBounds();
+					float overlapLeft = ballBounds.left + ballBounds.width - blockBounds.left;
+					float overlapRight = blockBounds.left + blockBounds.width - ballBounds.left;
+					float overlapTop = ballBounds.top + ballBounds.height - blockBounds.top;
+					float overlapBottom = blockBounds.top + blockBounds.height - ballBounds.top;
 
-				if (std::min(overlapLeft, overlapRight) < std::min(overlapTop, overlapBottom))
-				{
-					ballVelocity.x = -ballVelocity.x;
-				}
-				else
-				{
-					ballVelocity.y = -ballVelocity.y;
+					if (std::min(overlapLeft, overlapRight) < std::min(overlapTop, overlapBottom))
+					{
+						ballVelocity.x = -ballVelocity.x;
+					}
+					else
+					{
+						ballVelocity.y = -ballVelocity.y;
+					}
 				}
 				block.Destroy();
 				blocksRemaining--;
+
+				scoreSubject.NotifyBlockDestroyed(10);
+				if (rand() % 100 < 10)
+				{
+					SpawnBonus(block.GetPosition());
+				}
+
+				ballContext.OnBlockHit();
 				hitSound.play();
 				score += 10;
 				UpdateUI();
 
-				if (blocksRemaining == 0)
+				if (blocksRemaining == 0 && durableBlocks.empty())
 				{
 					Victory();
 				}
@@ -363,25 +397,42 @@ namespace SnakeGame
 		{
 			if (durableBlock.IsAlive() && ballBounds.intersects(durableBlock.GetGlobalBounds()))
 			{
-				sf::FloatRect blockBounds = durableBlock.GetGlobalBounds();
-				float overlapLeft = ballBounds.left + ballBounds.width - blockBounds.left;
-				float overlapRight = blockBounds.left + blockBounds.width - ballBounds.left;
-				float overlapTop = ballBounds.top + ballBounds.height - blockBounds.top;
-				float overlapBottom = blockBounds.top + blockBounds.height - ballBounds.top;
+				if (!ballCanPasThrough)
+				{
+					sf::FloatRect blockBounds = durableBlock.GetGlobalBounds();
+					float overlapLeft = ballBounds.left + ballBounds.width - blockBounds.left;
+					float overlapRight = blockBounds.left + blockBounds.width - ballBounds.left;
+					float overlapTop = ballBounds.top + ballBounds.height - blockBounds.top;
+					float overlapBottom = blockBounds.top + blockBounds.height - ballBounds.top;
 
-				if (std::min(overlapLeft, overlapRight) < std::min(overlapTop, overlapBottom))
-				{
-					ballVelocity.x = -ballVelocity.x;
+					if (std::min(overlapLeft, overlapRight) < std::min(overlapTop, overlapBottom))
+					{
+						ballVelocity.x = -ballVelocity.x;
+					}
+					else
+					{
+						ballVelocity.y = -ballVelocity.y;
+					}
 				}
-				else
-				{
-					ballVelocity.y = -ballVelocity.y;
-				}
-				if (durableBlock.OnHit())
+				bool isDestroyed = durableBlock.OnHit();
+
+				if (isDestroyed)
 				{
 					blocksRemaining--;
-					score += 30;
+					scoreSubject.NotifyBlockDestroyed(30);
+					if (rand() % 100 < 10)
+					{
+						SpawnBonus(durableBlock.GetPosition());
+					}
 				}
+
+				else
+
+				{
+					scoreSubject.NotifyBlockDestroyed(5);
+				}
+
+				ballContext.OnBlockHit();
 				hitSound.play();
 				UpdateUI();
 				if (blocksRemaining == 0)
@@ -392,6 +443,77 @@ namespace SnakeGame
 			}
 
 		}
+	}
+
+	void GameStatePlaying::SpawnBonus(const sf::Vector2f& position)
+	{
+		int bonusType = rand() % 3;
+		BonusType type;
+
+		switch (bonusType)
+		{
+		case 0: type = BonusType::FireBall; break;
+		case 1: type = BonusType::WidePlatform; break;
+		default: type = BonusType::SpeedPlatform; break;
+		}
+		bonuses.emplace_back(position, type);
+	}
+
+	void GameStatePlaying::CheckBonusCollisions()
+	{
+		sf::FloatRect platformBounds = currentPlatform->GetGlobalBounds();
+
+		for (auto it = bonuses.begin(); it != bonuses.end();)
+		{
+			if (!it->IsActive())
+			{
+				it = bonuses.erase(it);
+				continue;
+			}
+
+			if (it->GetGlobalBounds().intersects(platformBounds))
+			{
+				ApplyBonus(it->GetType());
+				it = bonuses.erase(it);
+			}
+			else if (it->GetGlobalBounds().top + it->GetGlobalBounds().height > SCREEN_HEGHT)
+			{
+				it = bonuses.erase(it);
+			}
+			else
+			{
+				++it;
+			}
+		}
+	}
+
+	void GameStatePlaying::ApplyBonus(BonusType type)
+	{
+		switch (type)
+		{
+		case BonusType::FireBall:
+			ballContext.SetBehavior(std::make_unique<FireBallBehavior>());
+			break;
+		case BonusType::WidePlatform:
+			currentPlatform = std::make_unique<WidePlatformDecorator>(std::move(currentPlatform));
+			break;
+		case BonusType::SpeedPlatform:
+			currentPlatform = std::make_unique<SpeedPlatformDecorator>(std::move(currentPlatform));
+			break;
+
+		}
+	}
+
+	void GameStatePlaying::GameOver()
+	{
+		if (isGameOver) return;
+
+		isGameOver = true;
+		isBallLaunched = false;
+		gameOverSound.play();
+
+		m_game->UpdateRecord(PLAYER_NAME, scoreDisplay.GetCurrentScore());
+		m_game->SwitchStateTo(GameStateType::GameOver);
 	}
 
 	void GameStatePlaying::Victory()

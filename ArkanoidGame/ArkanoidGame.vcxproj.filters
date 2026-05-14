@@ -46,6 +46,24 @@
     <ClCompile Include="DurableBlock.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="ScoreSubject.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="ScoreDisplay.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="NormvalBallBehavior.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="FireBallBehavior.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="BallContext.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Bonus.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -86,6 +104,51 @@
       <Filter>Sources</Filter>
     </ClInclude>
     <ClInclude Include="DurableBlock.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="ScoreSubject.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="IScoreObserver.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="ScoreDisplay.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="IBallBehavior.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="NormalBallBehavior.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="FireBallBehavior.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="BallContext.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="IPlatform.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="Platform.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="PlatformDecorator.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="WidePlatformDecorator.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="SpeedPlatformDecorator.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="GameMemento.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="SaveManager.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="Bonus.h">
       <Filter>Sources</Filter>
     </ClInclude>
   </ItemGroup>

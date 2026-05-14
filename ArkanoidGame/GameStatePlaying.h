@@ -5,6 +5,17 @@
 #include <vector>
 #include "Block.h"
 #include "DurableBlock.h"
+#include "ScoreSubject.h"
+#include "ScoreDisplay.h"
+#include "BallContext.h"
+#include "IPlatform.h"
+#include "Platform.h"
+#include "SaveManager.h"
+#include "Bonus.h"
+#include "NormalBallBehavior.h"
+#include "FireBallBehavior.h"
+#include "WidePlatformDecorator.h"
+#include "SpeedPlatformDecorator.h"
 
 
 
@@ -67,6 +78,19 @@ namespace SnakeGame
 		sf::Sound gameOverSound;
 		sf::Sound victorySound;
 
+		ScoreSubject scoreSubject;
+		ScoreDisplay scoreDisplay;
+		
+		BallContext ballContext;
+
+		std::unique_ptr<IPlatform> currentPlatform;
+
+		SaveManager saveManager;
+
+		std::vector<Bonus> bonuses;
+		float bonusTimer = 0.f;
+
+		
 		void UpdatePlatformMovement(sf::RenderWindow& window);
 		void UpdateBallMovement(float timeDelta);
 		void CheckCollisions();
@@ -76,6 +100,9 @@ namespace SnakeGame
 		void GameOver();
 		void Victory();
 		void SpawnBlocks();
+		void SpawnBonus(const sf::Vector2f& position);
+		void CheckBonusCollisions();
+		void ApplyBonus(BonusType type);
 	};
 
 }
