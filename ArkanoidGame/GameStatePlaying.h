@@ -70,7 +70,7 @@ namespace SnakeGame
 		bool isVictory = false;
 		bool isPaused = false;
 
-		//sf::Text scoreText;
+	
 		sf::Text inputHintText;
 		sf::RectangleShape background;
 
@@ -93,6 +93,13 @@ namespace SnakeGame
 
 		std::vector<Bonus> bonuses;
 		float bonusTimer = 0.f;
+
+		struct BonusIndicator
+		{
+			sf::RectangleShape box;
+			sf::Text description;
+		};
+		std::vector<BonusIndicator> bonusIndicator;
 
 		
 		void UpdatePlatformMovement(sf::RenderWindow& window);

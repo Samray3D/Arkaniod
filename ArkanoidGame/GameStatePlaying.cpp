@@ -45,6 +45,30 @@ namespace SnakeGame
 		inputHintText.setString("Press SPACE to launch ball, press ESC to pause");
 		inputHintText.setOrigin(GetTextOrigin(inputHintText, { 1.f, 0.f }));
 
+		float startX = 20.f;
+		float startY = SCREEN_HEGHT - 85.f;
+		float boxSize = 20.f;
+		float spacing = 10.f;
+
+		std::vector<std::pair<sf::Color, std::string>> bonuses =
+		{
+			{sf::Color::Red, "damage+"},
+			{sf::Color::Blue, "size"},
+			{sf::Color(255, 255, 0), "speed"}
+		};
+
+		for (size_t i = 0; i < bonuses.size(); i++)
+		{
+			BonusIndicator indicator;
+
+			indicator.box.setSize(sf::Vector2f(boxSize, boxSize));
+			indicator.box.setFillColor(bonuses[i].first);
+			indicator.box.setOutlineColor(sf::Color::White);
+			indicator.box.setOutlineThickness(1.f);
+			indicator.box.setPosition(startX + i * (boxSize + spacing * 3), startY);
+
+			
+		}
 
 		scoreSubject.AddObserver(&scoreDisplay);
 		ballContext.SetBehavior(std::make_unique<NormalBallBehavior>());
