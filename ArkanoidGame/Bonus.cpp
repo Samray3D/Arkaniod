@@ -47,4 +47,19 @@ namespace SnakeGame
 	{
 		return shape.getGlobalBounds();
 	}
+
+	bool Bonus::IsActive() const
+	{
+		return isActive;
+	}
+
+	void Bonus::Collect()
+	{
+		isActive = false;
+	}
+
+	BonusType Bonus::GetType() const
+	{
+		return type;
+	}
 }

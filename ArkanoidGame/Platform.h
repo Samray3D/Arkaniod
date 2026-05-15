@@ -14,7 +14,7 @@ namespace SnakeGame
 		sf::Vector2f GetPosition() const override;
 		void SetPosition(const sf::Vector2f& position) override;
 		float GetWidth() const override { return width; }
-		void Move(float deltaX);
+		void Move(float deltaX) override;
 
 	private:
 		sf::RectangleShape shape;

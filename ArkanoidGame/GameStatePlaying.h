@@ -16,17 +16,19 @@
 #include "FireBallBehavior.h"
 #include "WidePlatformDecorator.h"
 #include "SpeedPlatformDecorator.h"
+#include "GameStateData.h"
 
 
 
 namespace SnakeGame
 {
+	
 	class Game;
 
 	class GameStatePlaying : public GameStateData
 	{
 	public:
-		GameStatePlaying() = default;
+		GameStatePlaying();
 		~GameStatePlaying() = default;
 
 		void Init(Game* game) override;
@@ -58,7 +60,6 @@ namespace SnakeGame
 		float platformSpeed = 400.f;
 		float ballSpeed = 300.f;
 
-		int score = 0;
 		
 
 		bool isBallLaunched = false;

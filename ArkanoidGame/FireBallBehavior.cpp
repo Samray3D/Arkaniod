@@ -2,17 +2,17 @@
 
 namespace SnakeGame
 {
-	void FirelBallBehavior::Update(sf::CircleShape& ball, sf::Vector2f& velocity, float timeDelta)
+	void FireBallBehavior::Update(sf::CircleShape& ball, sf::Vector2f& velocity, float timeDelta)
 	{
 		ball.move(velocity * timeDelta);
 	}
 
-	void FirelBallBehavior::OnBlockHit()
+	void FireBallBehavior::OnBlockHit()
 	{
 		blocksHitInRow++;
 	}
 
-	void FirelBallBehavior::OnPlatformHit()
+	void FireBallBehavior::OnPlatformHit()
 	{
 		blocksHitInRow = 0;
 	}

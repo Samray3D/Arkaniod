@@ -3,7 +3,7 @@
 
 namespace SnakeGame
 {
-	ScoreDisplay::ScoreDisplay(sf::Font& font)
+	void ScoreDisplay::Init(sf::Font& font)
 	{
 		scoreText.setFont(font);
 		scoreText.setCharacterSize(24);

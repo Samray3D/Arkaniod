@@ -64,6 +64,24 @@
     <ClCompile Include="Bonus.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="Platform.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="PlatformDecorator.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="WidePlatformDecorator.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="SpeedPlatformDecorator.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="SaveManager.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="GameMemento.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">

@@ -3,9 +3,15 @@
 #include "Text.h"
 #include <assert.h>
 #include <sstream>
+#include "FireBallBehavior.h"
 
 namespace SnakeGame
 {
+	GameStatePlaying::GameStatePlaying() : bonusTimer(0.f)
+	{
+
+	}
+
 	void GameStatePlaying::Init(Game* game)
 	{	
 		m_game = game;
@@ -49,7 +55,6 @@ namespace SnakeGame
 		basePlatform->Init(platformWidth, platformHeight, sf::Color::Red);
 		currentPlatform = std::move(basePlatform);
 
-		score = 0;
 		isGameOver = false;
 		isVictory = false;
 		isBallLaunched = false;
@@ -109,12 +114,22 @@ namespace SnakeGame
 	{
 		if (isGameOver || isVictory || isPaused) return;
 
+		if (bonusTimer > 0.f)
+		{
+			bonusTimer -= timeDelta;
+			if (bonusTimer <= 0.f)
+			{
+				ballContext.SetBehavior(std::make_unique<NormalBallBehavior>());
+			}
+		}
+
 		for (auto& bonus : bonuses)
 		{
 			bonus.Update(timeDelta);
 		}
 
 		UpdatePlatformMovement(window);
+		CheckBonusCollisions();
 		CheckBlockCollisions();
 		
 		if (isBallLaunched)
@@ -266,7 +281,6 @@ namespace SnakeGame
 				ballVelocity.y = ballVelocity.y / length * ballSpeed;
 			}
 			hitSound.play();
-			score++;
 			UpdateUI();
 		}
 	}
@@ -279,20 +293,9 @@ namespace SnakeGame
 
 	void GameStatePlaying::UpdateUI()
 	{
-		scoreText.setString("Score: " + std::to_string(score) + "Blocks: " + std::to_string(blocksRemaining));
+		scoreText.setString("Score: " + std::to_string(scoreDisplay.GetCurrentScore()) + "Blocks: " + std::to_string(blocksRemaining));
 	}
 
-	void GameStatePlaying::GameOver()
-	{
-		if (isGameOver) return;
-
-		isGameOver = true;
-		isBallLaunched = false;
-		gameOverSound.play();
-
-		m_game->UpdateRecord(PLAYER_NAME, score);
-		m_game->SwitchStateTo(GameStateType::GameOver);
-	}
 
 	void GameStatePlaying::SpawnBlocks()
 	{
@@ -383,7 +386,6 @@ namespace SnakeGame
 
 				ballContext.OnBlockHit();
 				hitSound.play();
-				score += 10;
 				UpdateUI();
 
 				if (blocksRemaining == 0 && durableBlocks.empty())
@@ -461,6 +463,8 @@ namespace SnakeGame
 
 	void GameStatePlaying::CheckBonusCollisions()
 	{
+		if (!currentPlatform) return;
+
 		sf::FloatRect platformBounds = currentPlatform->GetGlobalBounds();
 
 		for (auto it = bonuses.begin(); it != bonuses.end();)
@@ -493,6 +497,7 @@ namespace SnakeGame
 		{
 		case BonusType::FireBall:
 			ballContext.SetBehavior(std::make_unique<FireBallBehavior>());
+			bonusTimer = 10.f;
 			break;
 		case BonusType::WidePlatform:
 			currentPlatform = std::make_unique<WidePlatformDecorator>(std::move(currentPlatform));

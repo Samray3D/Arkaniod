@@ -7,7 +7,9 @@ namespace SnakeGame
 	class ScoreDisplay : public IScoreObserver
 	{
 	public:
-		ScoreDisplay(sf::Font& font);
+		ScoreDisplay() = default;
+		void Init(sf::Font& font);
+		
 		void OnScoreChanged(int newScore) override;
 		void OnBlockDestroyed(int points) override;
 		void Draw(sf::RenderWindow& window);

@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include "IBallBehavior.h"
+#include <SFML/Graphics.hpp>
 
 namespace SnakeGame
 {

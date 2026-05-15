@@ -3,7 +3,7 @@
 
 namespace SnakeGame
 {
-	class FirelBallBehavior : public IBallBehavior
+	class FireBallBehavior : public IBallBehavior
 	{
 	public:
 		void Update(sf::CircleShape& ball, sf::Vector2f& velocity, float timeDelta) override;

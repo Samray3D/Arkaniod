@@ -13,6 +13,7 @@ namespace SnakeGame
 		virtual sf::Vector2f GetPosition() const = 0;
 		virtual void SetPosition(const sf::Vector2f& position) = 0;
 		virtual float GetWidth() const = 0;
+		virtual void Move(float deltaX) = 0;
 
 	};
 }

@@ -17,9 +17,9 @@ namespace SnakeGame
 		void Update(float timeDelta);
 		void Draw(sf::RenderWindow& window);
 		sf::FloatRect GetGlobalBounds() const;
-		bool IsActive() const { return isActive; }
-		void Collect() { isActive = false; }
-		BonusType GetType() const { return type; }
+		bool IsActive() const;
+		void Collect();
+		BonusType GetType() const;
 
 	private:
 		sf::RectangleShape shape;
