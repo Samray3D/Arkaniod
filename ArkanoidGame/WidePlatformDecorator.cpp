@@ -68,4 +68,14 @@ namespace SnakeGame
 			platform->SetPosition(position);
 		}
 	}
+
+	void WidePlatformDecorator::ApplyEffect()
+	{
+		if (platform)
+		{
+			platform->SetSize(sf::Vector2f(expandedWidth, platform->GetSize().y));
+			timeRemaining = 10.f;
+			platform->SetPosition(platform->GetPosition());
+		}
+	}
 }

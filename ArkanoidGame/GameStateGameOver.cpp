@@ -11,6 +11,8 @@ namespace SnakeGame
 	{
 		m_game = game;
 
+		int currentScore = m_game->GetLastScore();
+
 		assert(font.loadFromFile(RESOURCES_PATH + "Fonts/Roboto-Regular.ttf"));
 
 		timeSinceGameOver = 0.f;
@@ -29,10 +31,24 @@ namespace SnakeGame
 
 		const auto& recordsTable = m_game->GetRecordsTable();
 		std::multimap<int, std::string> sortedRecordsTable;
-		int snakeScores = m_game->GetRecordByPlayerId(PLAYER_NAME);
 		for (const auto& item : recordsTable)
 		{
 			sortedRecordsTable.insert(std::make_pair(item.second, item.first));
+		}
+
+		bool currentScoreAdded = false;
+		for (const auto& item : sortedRecordsTable)
+		{
+			if (item.second == PLAYER_NAME)
+			{
+				currentScore = true;
+				break;
+			}
+		}
+
+		if (!currentScoreAdded)
+		{
+			sortedRecordsTable.insert(std::make_pair(currentScore, PLAYER_NAME));
 		}
 
 		bool isSnakeInTable = false;
@@ -63,7 +79,7 @@ namespace SnakeGame
 			recordsTableTexts.emplace_back();
 			sf::Text& text = recordsTableTexts.back();
 			std::stringstream sstream;
-			sstream << recordsTable.size() + 1 << ". " << PLAYER_NAME << ": " << snakeScores;
+			sstream << recordsTable.size() + 1 << ". " << PLAYER_NAME << ": " << currentScore;
 			text.setString(sstream.str());
 			text.setFont(font);
 			text.setCharacterSize(24);

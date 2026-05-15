@@ -74,6 +74,9 @@ namespace SnakeGame
 		int GetRecordByPlayerId(const std::string& playerId) const;
 		void UpdateRecord(const std::string& playerId, int score);
 
+		void SetLastScore(int score) { lastScore = score; }
+		int GetLastScore() const { return lastScore;  }
+
 		void PushState(GameStateType stateType, bool isExclusivelyVisible);
 
 		void PopState();
@@ -86,6 +89,8 @@ namespace SnakeGame
 		sf::RenderWindow* GetWindow() { return m_window; }
 
 	private:
+
+		int lastScore = 0;
 		sf::RenderWindow* m_window = nullptr;
 
 		std::vector<GameState> stateStack;

@@ -39,6 +39,9 @@ namespace SnakeGame
 		void Draw(sf::RenderWindow& window) override;
 		void Resume() override;
 
+		void SaveGame();
+		void LoadGame();
+
 	private:
 
 		Game* m_game = nullptr;
@@ -67,7 +70,7 @@ namespace SnakeGame
 		bool isVictory = false;
 		bool isPaused = false;
 
-		sf::Text scoreText;
+		//sf::Text scoreText;
 		sf::Text inputHintText;
 		sf::RectangleShape background;
 

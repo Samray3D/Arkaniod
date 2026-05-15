@@ -28,7 +28,7 @@ namespace SnakeGame
 		}
 		else
 		{
-			isAlive = false;
+			Destroy();
 			return true;
 		}
 	}

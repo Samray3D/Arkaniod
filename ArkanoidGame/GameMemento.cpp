@@ -36,4 +36,14 @@ namespace SnakeGame
 	{
 		return blocksRemaining;
 	}
+
+	void GameMemento::SetBlocks(const std::vector<bool>& blocksState)
+	{
+		this->blockState = blocksState;
+	}
+
+	std::vector<bool> GameMemento::GetBlocksState() const
+	{
+		return blockState;
+	}
 }

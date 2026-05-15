@@ -14,6 +14,7 @@ namespace SnakeGame
 		sf::FloatRect GetGlobalBounds() const override;
 		sf::Vector2f GetPosition() const override;
 		void SetPosition(const sf::Vector2f& position) override;
+		void ApplyEffect();
 
 
 	private:

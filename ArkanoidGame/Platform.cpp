@@ -49,4 +49,17 @@ namespace SnakeGame
 	{
 		shape.move(deltaX, 0.f);
 	}
+
+	sf::Vector2f Platform::GetSize() const
+	{
+		return shape.getSize();
+	}
+
+	void Platform::SetSize(const sf::Vector2f& size)
+	{
+		shape.setSize(size);
+		shape.setOrigin(size.x / 2.f, size.y / 2.f);
+		width = size.x;
+		height = size.y;
+	}
 }

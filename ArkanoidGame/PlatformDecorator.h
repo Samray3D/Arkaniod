@@ -15,6 +15,9 @@ namespace SnakeGame
 		void SetPosition(const sf::Vector2f& position) override;
 		float GetWidth() const override;
 		void Move(float deltaX) override;
+		virtual sf::Vector2f GetSize() const override;
+		virtual void SetSize(const sf::Vector2f& size) override;
+
 
 	protected:
 		std::unique_ptr<IPlatform> platform;

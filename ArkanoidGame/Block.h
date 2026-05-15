@@ -16,6 +16,8 @@ namespace SnakeGame
 		sf::FloatRect GetGlobalBounds() const override;
 		sf::Vector2f GetPosition() const override;
 		void SetPosition(const sf::Vector2f& position) override;
+		bool IsAlive() const { return isAlive; }
+		void Destroy() { isAlive = false; }
 
 	protected:
 		sf::RectangleShape shape;

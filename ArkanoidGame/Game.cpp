@@ -27,6 +27,9 @@ namespace SnakeGame
 		stateChangeType = GameStateChangeType::None;
 		pendingGameStateType = GameStateType::None;
 		pendingGameStateIsExclusivelyVisible = false;
+
+		lastScore = 0;
+
 		SwitchStateTo(GameStateType::MainMenu);
 	}
 

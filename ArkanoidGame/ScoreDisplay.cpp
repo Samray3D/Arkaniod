@@ -9,6 +9,7 @@ namespace SnakeGame
 		scoreText.setCharacterSize(24);
 		scoreText.setFillColor(sf::Color::White);
 		scoreText.setPosition(10.f, 10.f);
+		scoreText.setString("Score: 0");
 	}
 
 	void ScoreDisplay::OnScoreChanged(int newScore)

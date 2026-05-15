@@ -7,7 +7,7 @@ namespace SnakeGame
 	{
 		FireBall,
 		WidePlatform,
-		SpeedPlatform
+		SpeedBall
 	};
 
 	class Bonus

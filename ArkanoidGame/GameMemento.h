@@ -13,6 +13,8 @@ namespace SnakeGame
 		sf::Vector2f GetPlatformPosition() const;
 		int GetScore() const;
 		int GetBlocksRemaining() const;
+		void SetBlocks(const std::vector<bool>& blocksState);
+		std::vector<bool> GetBlocksState() const;
 
 	private:
 		sf::Vector2f ballPosition;
@@ -20,5 +22,6 @@ namespace SnakeGame
 		sf::Vector2f platformPosition;
 		int score;
 		int blocksRemaining;
+		std::vector<bool> blockState;
 	};
 }

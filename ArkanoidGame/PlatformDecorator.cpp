@@ -50,4 +50,14 @@ namespace SnakeGame
 	{
 		if (platform) platform->Move(deltaX);
 	}
+
+	sf::Vector2f PlatformDecorator::GetSize() const
+	{
+		return platform ? platform->GetSize() : sf::Vector2f();
+	}
+
+	void PlatformDecorator::SetSize(const sf::Vector2f& size)
+	{
+		if (platform) platform->SetSize(size);
+	}
 }

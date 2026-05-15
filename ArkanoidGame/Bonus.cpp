@@ -21,8 +21,8 @@ namespace SnakeGame
 		case BonusType::WidePlatform:
 			shape.setFillColor(sf::Color::Blue);
 			break;
-		case BonusType::SpeedPlatform:
-			shape.setFillColor(sf::Color::Green);
+		case BonusType::SpeedBall:
+			shape.setFillColor(sf::Color::Yellow);
 			break;
 		}
 	}

@@ -17,6 +17,7 @@ namespace SnakeGame
 		m_game = game;
 
 		assert(font.loadFromFile(FONTS_PATH + "Roboto-Regular.ttf"));
+		scoreDisplay.Init(font);
 		assert(hitSoundBuffer.loadFromFile(SOUNDS_PATH + "Hit.wav"));
 		hitSound.setBuffer(hitSoundBuffer);
 		assert(gameOverSoundBuffer.loadFromFile(SOUNDS_PATH + "Death.wav"));
@@ -37,10 +38,6 @@ namespace SnakeGame
 		ball.setFillColor(sf::Color::Yellow);
 		ball.setOrigin(ballRadius, ballRadius);
 		
-		scoreText.setFont(font);
-		scoreText.setCharacterSize(24);
-		scoreText.setFillColor(sf::Color::White);
-		scoreText.setPosition(10.f, 10.f);
 
 		inputHintText.setFont(font);
 		inputHintText.setCharacterSize(24);
@@ -102,6 +99,14 @@ namespace SnakeGame
 			{
 				isBallLaunched = true;
 			}
+			else if (event.key.code == sf::Keyboard::F5)
+			{
+				SaveGame();
+			}
+			else if (event.key.code == sf::Keyboard::F6)
+			{
+				LoadGame();
+			}
 		}
 	}
 
@@ -120,6 +125,14 @@ namespace SnakeGame
 			if (bonusTimer <= 0.f)
 			{
 				ballContext.SetBehavior(std::make_unique<NormalBallBehavior>());
+				ballSpeed = 300.f;
+
+				float length = std::sqrt(ballVelocity.x * ballVelocity.x + ballVelocity.y * ballVelocity.y);
+				if (length > 0)
+				{
+					ballVelocity.x = ballVelocity.x / length * ballSpeed;
+					ballVelocity.y = ballVelocity.y / length * ballSpeed;
+				}
 			}
 		}
 
@@ -130,7 +143,6 @@ namespace SnakeGame
 
 		UpdatePlatformMovement(window);
 		CheckBonusCollisions();
-		CheckBlockCollisions();
 		
 		if (isBallLaunched)
 		{
@@ -164,7 +176,14 @@ namespace SnakeGame
 			bonus.Draw(window);
 		}
 
-		window.draw(platform);
+		if (currentPlatform)
+		{
+			currentPlatform->Draw(window);
+		}
+		else
+		{
+			window.draw(platform);
+		}
 		window.draw(ball);
 		scoreDisplay.Draw(window);
 
@@ -234,6 +253,11 @@ namespace SnakeGame
 		platformPos.x = std::max(platformWidth / 2.f, std::min(platformPos.x, SCREEN_WIDTH - platformWidth / 2.f));
 		platformPos.y = SCREEN_HEGHT - 50.f;
 		platform.setPosition(platformPos);
+
+		if (currentPlatform)
+		{
+			currentPlatform->SetPosition(platformPos);
+		}
 		
 	}
 
@@ -257,6 +281,7 @@ namespace SnakeGame
 		}
 		else if (ball.getPosition().y + ballRadius >= SCREEN_HEGHT)
 		{
+			SaveGame();
 			GameOver();
 		}
 	}
@@ -293,7 +318,7 @@ namespace SnakeGame
 
 	void GameStatePlaying::UpdateUI()
 	{
-		scoreText.setString("Score: " + std::to_string(scoreDisplay.GetCurrentScore()) + "Blocks: " + std::to_string(blocksRemaining));
+		
 	}
 
 
@@ -391,31 +416,52 @@ namespace SnakeGame
 				if (blocksRemaining == 0 && durableBlocks.empty())
 				{
 					Victory();
+					return;
 				}
-				return;
+			
 			}
 		}
 		for (auto& durableBlock : durableBlocks)
 		{
 			if (durableBlock.IsAlive() && ballBounds.intersects(durableBlock.GetGlobalBounds()))
 			{
+				sf::FloatRect blockBounds = durableBlock.GetGlobalBounds();
+				float overlapLeft = ballBounds.left + ballBounds.width - blockBounds.left;
+				float overlapRight = blockBounds.left + blockBounds.width - ballBounds.left;
+				float overlapTop = ballBounds.top + ballBounds.height - blockBounds.top;
+				float overlapBottom = blockBounds.top + blockBounds.height - ballBounds.top;
+
 				if (!ballCanPasThrough)
 				{
-					sf::FloatRect blockBounds = durableBlock.GetGlobalBounds();
-					float overlapLeft = ballBounds.left + ballBounds.width - blockBounds.left;
-					float overlapRight = blockBounds.left + blockBounds.width - ballBounds.left;
-					float overlapTop = ballBounds.top + ballBounds.height - blockBounds.top;
-					float overlapBottom = blockBounds.top + blockBounds.height - ballBounds.top;
-
+					
 					if (std::min(overlapLeft, overlapRight) < std::min(overlapTop, overlapBottom))
 					{
 						ballVelocity.x = -ballVelocity.x;
+						if (overlapLeft < overlapRight)
+						{
+							ball.setPosition(blockBounds.left - ballRadius - 1.f, ball.getPosition().y);
+						}
+						else
+						{
+							ball.setPosition(blockBounds.left + blockBounds.width + ballRadius + 1.f, ball.getPosition().y);
+						}
 					}
 					else
 					{
 						ballVelocity.y = -ballVelocity.y;
+						if (overlapTop < overlapBottom)
+						{
+							ball.setPosition(ball.getPosition().x, blockBounds.top - ballRadius - 1.f);
+						}
+						else
+						{
+							ball.setPosition(ball.getPosition().x, blockBounds.top + blockBounds.height + ballRadius + 1.f);
+						}
 					}
 				}
+
+				ballBounds = ball.getGlobalBounds();
+
 				bool isDestroyed = durableBlock.OnHit();
 
 				if (isDestroyed)
@@ -440,8 +486,9 @@ namespace SnakeGame
 				if (blocksRemaining == 0)
 				{
 					Victory();
+					return;
 				}
-				return;
+				
 			}
 
 		}
@@ -456,7 +503,7 @@ namespace SnakeGame
 		{
 		case 0: type = BonusType::FireBall; break;
 		case 1: type = BonusType::WidePlatform; break;
-		default: type = BonusType::SpeedPlatform; break;
+		default: type = BonusType::SpeedBall; break;
 		}
 		bonuses.emplace_back(position, type);
 	}
@@ -493,6 +540,8 @@ namespace SnakeGame
 
 	void GameStatePlaying::ApplyBonus(BonusType type)
 	{
+		sf::Vector2f currentPos = platform.getPosition();
+
 		switch (type)
 		{
 		case BonusType::FireBall:
@@ -501,11 +550,23 @@ namespace SnakeGame
 			break;
 		case BonusType::WidePlatform:
 			currentPlatform = std::make_unique<WidePlatformDecorator>(std::move(currentPlatform));
+			static_cast<WidePlatformDecorator*>(currentPlatform.get())->ApplyEffect();
 			break;
-		case BonusType::SpeedPlatform:
-			currentPlatform = std::make_unique<SpeedPlatformDecorator>(std::move(currentPlatform));
+		case BonusType::SpeedBall:
+			ballSpeed = 600.f;
+			float length = std::sqrt(ballVelocity.x * ballVelocity.x + ballVelocity.y * ballVelocity.y);
+			if (length > 0)
+			{
+				ballVelocity.x = ballVelocity.x / length * ballSpeed;
+				ballVelocity.y = ballVelocity.y / length * ballSpeed;
+			}
+			bonusTimer = 5.f;
 			break;
 
+		}
+		if (currentPlatform)
+		{
+			currentPlatform->SetPosition(currentPos);
 		}
 	}
 
@@ -517,8 +578,10 @@ namespace SnakeGame
 		isBallLaunched = false;
 		gameOverSound.play();
 
+		m_game->SetLastScore(scoreDisplay.GetCurrentScore());
 		m_game->UpdateRecord(PLAYER_NAME, scoreDisplay.GetCurrentScore());
 		m_game->SwitchStateTo(GameStateType::GameOver);
+		
 	}
 
 	void GameStatePlaying::Victory()
@@ -527,6 +590,56 @@ namespace SnakeGame
 
 		isVictory = true;
 		isBallLaunched = false;
+		ballVelocity = sf::Vector2f(0.f, 0.f);
 		victorySound.play();
+	}
+
+	void GameStatePlaying::SaveGame()
+	{
+		std::vector<bool> blocksState;
+		for (const auto& block : blocks)
+		{
+			blocksState.push_back(block.IsAlive());
+		}
+		for (const auto& block : durableBlocks)
+		{
+			blocksState.push_back(block.IsAlive());
+		}
+
+		auto memento = std::make_unique<GameMemento>(
+			ball.getPosition(),
+			ballVelocity,
+			platform.getPosition(),
+			scoreDisplay.GetCurrentScore(),
+			blocksRemaining
+		);
+
+		memento->SetBlocks(blocksState);
+		saveManager.SaveState(std::move(memento));
+		printf("Game saved!\n");
+	}
+
+	void GameStatePlaying::LoadGame()
+	{
+		if (!saveManager.HasSavedState())
+		{
+			printf("No saved game found!\n");
+			return;
+		}
+
+		auto memento = saveManager.LoadLastState();
+		if (memento)
+		{
+			ball.setPosition(memento->GetBallPosition());
+			ballVelocity = memento->GetBallVelocity();
+
+			platform.setPosition(memento->GetPlatformPosition());
+			if (currentPlatform)
+			{
+				currentPlatform->SetPosition(memento->GetPlatformPosition());
+			}
+
+			scoreDisplay.OnScoreChanged(memento->GetScore());
+		}
 	}
 }

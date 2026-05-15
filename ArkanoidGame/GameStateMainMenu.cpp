@@ -19,6 +19,7 @@ namespace SnakeGame
 		menu.rootItem.childrenAlignment = Alignment::Middle;
 		menu.rootItem.childrenSpacing = 10.f;
 		menu.rootItem.children.push_back(&startGameItem);
+		
 		menu.rootItem.children.push_back(&recordsItem);
 		menu.rootItem.children.push_back(&exitGameItem);
 
