@@ -101,6 +101,8 @@ namespace SnakeGame
 		};
 		std::vector<BonusIndicator> bonusIndicator;
 
+		int lives = 3;
+
 		
 		void UpdatePlatformMovement(sf::RenderWindow& window);
 		void UpdateBallMovement(float timeDelta);

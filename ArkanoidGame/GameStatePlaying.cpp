@@ -80,9 +80,11 @@ namespace SnakeGame
 		isVictory = false;
 		isBallLaunched = false;
 		isPaused = false;
+		lives = 3;
 		SpawnBlocks();
 		ResetBall();
 		UpdateUI();
+		SaveGame();
 
 
 	}
@@ -211,6 +213,57 @@ namespace SnakeGame
 		window.draw(ball);
 		scoreDisplay.Draw(window);
 
+		sf::Text livesText;
+		livesText.setFont(font);
+		livesText.setCharacterSize(20);
+		livesText.setFillColor(sf::Color::White);
+		livesText.setString("Lives: " + std::to_string(lives));
+		livesText.setPosition(SCREEN_WIDTH - 80.f,SCREEN_HEGHT - 35.f);
+		window.draw(livesText);
+
+		float startX = 20.f;
+		float startY = SCREEN_HEGHT - 70.f;
+		float boxSize = 18.f;
+
+		sf::RectangleShape fireBox(sf::Vector2f(boxSize, boxSize));
+		fireBox.setFillColor(sf::Color::Red);
+		fireBox.setPosition(startX, startY);
+		window.draw(fireBox);
+
+		sf::Text fireText;
+		fireText.setFont(font);
+		fireText.setCharacterSize(12);
+		fireText.setFillColor(sf::Color::White);
+		fireText.setString("Damage+");
+		fireText.setPosition(startX + boxSize + 5.f, startY + 3.f);
+		window.draw(fireText);
+
+		sf::RectangleShape wideBox(sf::Vector2f(boxSize, boxSize));
+		wideBox.setFillColor(sf::Color::Blue);
+		wideBox.setPosition(startX + 130.f, startY);
+		window.draw(wideBox);
+
+		sf::Text wideText;
+		wideText.setFont(font);
+		wideText.setCharacterSize(12);
+		wideText.setFillColor(sf::Color::White);
+		wideText.setString("Size+");
+		wideText.setPosition(startX + 130.f + boxSize + 5.f, startY + 3.f);
+		window.draw(wideText);
+
+		sf::RectangleShape speedBox(sf::Vector2f(boxSize, boxSize));
+		speedBox.setFillColor(sf::Color::Yellow);
+		speedBox.setPosition(startX + 270.f, startY);
+		window.draw(speedBox);
+
+		sf::Text speedText;
+		speedText.setFont(font);
+		speedText.setCharacterSize(12);
+		speedText.setFillColor(sf::Color::White);
+		speedText.setString("Speed+");
+		speedText.setPosition(startX + 270.f + boxSize + 5.f, startY + 3.f);
+		window.draw(speedText);
+
 		sf::Vector2f viewSize = window.getView().getSize();
 		inputHintText.setPosition(viewSize.x - 10.f, 10.f);
 		window.draw(inputHintText);
@@ -305,8 +358,23 @@ namespace SnakeGame
 		}
 		else if (ball.getPosition().y + ballRadius >= SCREEN_HEGHT)
 		{
-			SaveGame();
-			GameOver();
+			lives--;
+			if (lives > 0)
+			{
+				if (saveManager.HasSavedState())
+				{
+					LoadGame();
+				}
+			else
+				{
+					ResetBall();
+				}
+				isBallLaunched = true;
+			}
+			else
+			{
+				GameOver();
+			}
 		}
 	}
 
@@ -426,6 +494,7 @@ namespace SnakeGame
 				}
 				block.Destroy();
 				blocksRemaining--;
+				SaveGame();
 
 				scoreSubject.NotifyBlockDestroyed(10);
 				if (rand() % 100 < 10)
@@ -437,7 +506,7 @@ namespace SnakeGame
 				hitSound.play();
 				UpdateUI();
 
-				if (blocksRemaining == 0 && durableBlocks.empty())
+				if (blocksRemaining == 0)
 				{
 					Victory();
 					return;
@@ -491,6 +560,7 @@ namespace SnakeGame
 				if (isDestroyed)
 				{
 					blocksRemaining--;
+					SaveGame();
 					scoreSubject.NotifyBlockDestroyed(30);
 					if (rand() % 100 < 10)
 					{
@@ -613,6 +683,7 @@ namespace SnakeGame
 		if (isVictory) return;
 
 		isVictory = true;
+		//isGameOver = true;
 		isBallLaunched = false;
 		ballVelocity = sf::Vector2f(0.f, 0.f);
 		victorySound.play();
@@ -638,7 +709,7 @@ namespace SnakeGame
 			blocksRemaining
 		);
 
-		memento->SetBlocks(blocksState);
+		//memento->SetBlocks(blocksState);
 		saveManager.SaveState(std::move(memento));
 		printf("Game saved!\n");
 	}
@@ -664,6 +735,10 @@ namespace SnakeGame
 			}
 
 			scoreDisplay.OnScoreChanged(memento->GetScore());
+
+			blocksRemaining = memento->GetBlocksRemaining();
+
+			
 		}
 	}
 }
